@@ -11,69 +11,91 @@
 #include <math.h>
 #define USAGE "./particle_in_field"
 
-float *reserva(int n);
-void print_array(float *array, int n);
+
+double rk4(double(*f)(double, double), double dt, double x, double dx);
+double campox(double dy, double Bz);
+double campoy(double z, double Bx);
+double campoz(double dx, double By);
+
 
 
 int main(int argc, char **argv){
     
-    float *x;
-    float *y;
-    float *z;
-    float k = atof(argv[1]);
-    float alpha = atof(argv[2]);
-    float b_0 = 0.00003;
-    float r_t = 6378.1 * 1000;
-    float pi = M_PI;
-    float m = 938.272013;
-    float c = 300000000;
+  
+    double k = atof(argv[1]);
+    double alpha = atof(argv[2]);
+    double r_t = 6378.1 * 1000;
+    double pi = M_PI;
+    double b_0 = 0.00003;
+    double m = 1.672*pow(10,-2);
     double q = 1.602176487 / pow(10,19);
-    int n = 100;
+    double c = 300000000;
+    double v = sqrt( pow(c,2) - (m*pow(c,4))/(k + m*pow(c,2)));
+    double *x;
+    double *dx;
+    double *y;
+    double *dy;
+    double *z;
+    double *dz;
+    double x0 = 2*r_t, x1 = v*sin(alpha), y1 = v*cos(alpha);
+    int i, dt = 1, n = 100;
+    //La magnitud de la velocidad será constante debido a que el campo magnético no genera trabajo sobre el protón
+    float g= k/(m*pow(c,2)) +1 ;
     
-    x = reserva(n);
-    y = reserva(n);
-    z = reserva(n);
-    
-    x[0] = 2*r_t;
-    
-    printf("%f\n", alpha);
-    
+    x = malloc(sizeof(double) * n);
+    y = malloc(sizeof(double) * n);
+    dx = malloc(sizeof(double) * n);
+    dy = malloc(sizeof(double) * n);
+    z = malloc(sizeof(double) * n);
+    dz = malloc(sizeof(double) * n);
     
     
     
+    for (i = 0; i < n; i++){
+        x[i] = rk4(campox, dt, x0 , x1);
+    }
+    for (i = 0; i < n; i++){
+        y[i] = rk4(campoy, dt, 0, y1);
+    }
+    for (i = 0; i < n; i++){
+        z[i] = rk4(campoz, dt, 0 ,0);
+    }
+
+ 
     
+  
+
+    
+    return 0;
 }
 
 
-float *reserva(int n){
-    float *array;
-    int i;
-    if(!(array = malloc(n * sizeof(float)))){
-        printf("Problema en reserva\n");
-        exit(1);
-    }
-    for(i=0;i<n;i++){
-        array[i] = 0.0;
-    }
-    return array;
+
+
+double rk4(double(*f)(double, double), double dt, double x, double dx)
+{
+  
+    
+    double k1 = dt * f(x, dx),
+    k2 = dt * f(x + dt / 2, dx + k1 / 2),
+    k3 = dt * f(x + dt / 2, dx + k2 / 2),
+    k4 = dt * f(x + dt, dx + k3 );
+    
+    return dx + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+   
 }
 
-void print_array(float *array, int n){
-    int i;
-    for(i=0;i<n;i++){
-        printf("%g \n", array[i]);
-    }
+double campox(double dy, double Bz){
+    
+    return 1;
 }
 
-typedef struct{
-    float i,j,k;
-}Vector;
+double campoy(double z, double Bx){
+    return 2;
+}
 
-vector crossProduct(Vector a,Vector b){
-    
-    Vector c = {a.j*b.k - a.k*b.j, a.k*b.i - a.i*b.k, a.i*b.j - a.j*b.i};
-    
-    return c;
-    
+double campoz(double dx, double By){
+    return 3;
+}
 
 
