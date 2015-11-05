@@ -63,6 +63,11 @@ int main(int argc, char **argv){
 
  
     
+    for (i = 0; i < n; i ++) {
+       
+        printf("%g\t%g\t%g\n", x[i], y[i], z[i]);
+    }
+    
   
 
     
