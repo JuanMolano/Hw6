@@ -22,4 +22,4 @@ o.set_xlabel('x')
 o.set_ylabel('y')
 o.set_zlabel('z')
 
-plt.savefig('3dplot.pdf')
+plt.savefig('field.pdf')
